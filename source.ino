@@ -8,7 +8,6 @@
    Menu para Display LCD 16 x 2
    
    Autor: Eng. Wagner Rambo, Data: Agosto de 2015
-
 */
 
 // --- Bibliotecas Auxiliares ---
@@ -22,6 +21,7 @@
 #define Lamp1    A0                                     //Saída para lâmpada 1 no A0 (será usado como digital)
 #define Lamp2    A1                                     //Saída para lâmpada 2 no A1 (será usado como digital)
 #define LM35     A2                                     //Entrada do LM35 - Sensor de temperatura
+#define Buzzer   A5
 float temp_atual = 0;
 int ADClido = 0;
 
@@ -48,6 +48,30 @@ byte segundo[8] = {
   B00000
 };
 
+// --- Musica do Alarme ---
+
+const int c = 261; //do 
+const int d = 294; //re 
+const int e = 329; //mi 
+const int f = 349; //fa 
+const int g = 391; //sol
+const int gS = 415; //sol sustenido 
+const int a = 440; //la 
+const int aS = 455; //la sustenido 
+const int b = 466; //si 
+const int cH = 523; //do maior 
+const int cSH = 554; //do maior sustenido 
+const int dH = 587; //re maior 
+const int dSH = 622; //re maior sustenido  
+const int eH = 659; //mi maior sustenido
+const int fH = 698; //fa maior 
+const int fSH = 740; //fa maior sustenido 
+const int gH = 784; //so maior 
+const int gSH = 830; //so maior sustenido 
+const int aH = 880;  //la maior 
+
+
+
 // --- Protótipo das Funções Auxiliares ---
 void changeMenu();                                      //Função para modificar o menu atual
 void dispMenu();                                        //Função para mostrar o menu atual
@@ -55,6 +79,7 @@ void data_hora();                                       //Função do menu1, dat
 void temperatura();                                     //Função do menu2, temperatura
 void lights();                                          //Função do menu3, acionamento de lampadas
 void menu4();                                           //Função do menu4
+void alarme();
 
 // --- Variáveis Globais ---
 char menu = 0x01;                                       //Variável para selecionar o menu
@@ -78,7 +103,7 @@ void setup()
   
   pinMode(Lamp1, OUTPUT);                                //Configura saída para lâmpada 1
   pinMode(Lamp2, OUTPUT);                                //Configura saída para lâmpara 2
-  
+  pinMode(Buzzer, OUTPUT);
   t_butUp   = 0x00;                                      //limpa flag do botão Up
   t_butDown = 0x00;                                      //limpa flag do botão Down
   t_butP    = 0x00;                                      //limpa flag do botão P
@@ -145,7 +170,7 @@ void dispMenu()                                         //Mostra o menu atual
              
              break;    
        case 0x02:                                       //Caso 1
-             data_hora();                               //Chama a função de relógio
+             alarme();                               //Chama a função de relógio
              
              break;                                     //break
        case 0x03:                                       //Caso 2
@@ -160,7 +185,7 @@ void dispMenu()                                         //Mostra o menu atual
              menu4();                                   //Chama função para o menu4
              
              break;                                     //break
-    
+      
     } //end switch menu
 
 } //end dispMenu
@@ -272,24 +297,148 @@ void menu4()                                            //Função genérica par
 
 } //end menu4
 
+void alarme()                                            //Função genérica para um quarto menu...
+{
+   disp.setCursor(0,0);                                 //Posiciona cursor na coluna 1, linha 1
+   disp.print("Alarme");                                //Imprime mensagem
+   disp.setCursor(7,1);                                 //Posiciona cursor na coluna 8, linha 2
+    
+    if(!digitalRead(butP))    t_butP    = 0x01;          //Botão P pressionado? Seta flag
+   if(!digitalRead(butM))    t_butM    = 0x01;          //Botão M pressionado? Seta flag
+   
+   if(digitalRead(butP) && t_butP)                      //Botão P solto e flag setada?
+   {                                                    //Sim...
+      t_butP = 0x00;                                    //Limpa flag
+      
+      set1++;                                           //Incrementa set1
+      
+      if(set1 > 2) set1 = 0x01;                         //Se maior que 2, volta a ser 1
+      
+      switch(set1)                                      //Controle do set1
+      {
+          case 0x01:                                    //Caso 1
+                disp.setCursor(0,1);                    //Posiciona cursor na coluna 1, linha 2
+                disp.print("L1 on ");                   //Imprime mensagem
+                //digitalWrite(Lamp1, HIGH);              //Liga lâmpada 1
+                 //toca a primeira parte
+                parte1();
+                //toca a segunda parte
+                parte2();  
+                variacao();
+                break;                                  //Break
+          case 0x02:                                    //Caso 2
+                disp.setCursor(0,1);                    //Posiciona cursor na coluna 1, linha 2
+                disp.print("L1 off");                   //Imprime mensagem
+                //digitalWrite(Lamp1, LOW);               //Desliga lâmpada 1
+                noTone(Buzzer);
+                break;                                  //Break
+      
+      } //end switch set1
+   
+   } //end butP 
+   
+   
+   //disp.print("WR Kits");                               //Créditos  
+
+
+} //end menu4
+void beep(int nota, int duracao)
+{
+//toca a nota no pino 3
+  tone(Buzzer, nota, duracao);
+ 
+
+   delay(duracao);
+
+//Para o tom no pino do alto falante
+  noTone(Buzzer);
+ 
+  delay(50);
+
+}
+
+void parte1()
+{
+  beep(a, 500);
+  beep(a, 500);    
+  beep(a, 500);
+  beep(f, 350);
+  beep(cH, 150);  
+  beep(a, 500);
+  beep(f, 350);
+  beep(cH, 150);
+  beep(a, 650);
+ 
+  delay(500);
+ 
+  beep(eH, 500);
+  beep(eH, 500);
+  beep(eH, 500);  
+  beep(fH, 350);
+  beep(cH, 150);
+  beep(gS, 500);
+  beep(f, 350);
+  beep(cH, 150);
+  beep(a, 650);
+ 
+  delay(500);
+}
+
+//segunda parte
+void parte2()
+{
+  beep(aH, 500);
+  beep(a, 300);
+  beep(a, 150);
+  beep(aH, 500);
+  beep(gSH, 325);
+  beep(gH, 175);
+  beep(fSH, 125);
+  beep(fH, 125);    
+  beep(fSH, 250);
+ 
+  delay(325);
+ 
+  beep(aS, 250);
+  beep(dSH, 500);
+  beep(dH, 325);  
+  beep(cSH, 175);  
+  beep(cH, 125);  
+  beep(b, 125);  
+  beep(cH, 250);  
+ 
+  delay(350);
+}
+
+//variacao
+void variacao(){
+//Variacao 1
+beep(f, 250);  
+  beep(gS, 500);  
+  beep(f, 350);  
+  beep(a, 125);
+  beep(cH, 500);
+  beep(a, 375);  
+  beep(cH, 125);
+  beep(eH, 650);
+ 
+  delay(500);
+
+//repete a segunda parte
+  parte2();
+
+//segunda variacao da musica
+  beep(f, 250);  
+  beep(gS, 500);  
+  beep(f, 375);  
+  beep(cH, 125);
+  beep(a, 500);  
+  beep(f, 375);  
+  beep(cH, 125);
+  beep(a, 650);  
+ 
+  delay(650);
+}
 
    //pode-se implementar quantos menus quiser
    //............
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
