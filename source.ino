@@ -26,7 +26,7 @@ float temp_atual = 0;
 int ADClido = 0;
 
 // -- Desenho --
-
+byte termometro[8] = {B00100, B01010, B01010, B01110, B01110, B11111, B11111, B01110};
 byte primeiro[8] = {
   B01110,
   B11011,
